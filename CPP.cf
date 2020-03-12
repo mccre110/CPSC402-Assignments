@@ -30,10 +30,7 @@ EApp.    Exp15  ::= Id "(" [Exp] ")" ;
 
 EPIncr.  Exp14  ::= Exp15 "++" ;
 EPDecr.  Exp14  ::= Exp15 "--" ;
-<<<<<<< HEAD
 EQConst.  Exp15  ::= QualConst ;
-=======
->>>>>>> d3329a9ca4c9ff5d4de84be33fefcfda6ee20a75
 
 EIncr.   Exp13  ::= "++" Exp14 ;
 EDecr.   Exp13  ::= "--" Exp14 ;
@@ -42,10 +39,7 @@ ETimes.  Exp12  ::= Exp12 "*"  Exp13 ;
 EDiv.    Exp12  ::= Exp12 "/"  Exp13 ;
 EPlus.   Exp11  ::= Exp11 "+"  Exp12 ;
 EMinus.  Exp11  ::= Exp11 "-"  Exp12 ;
-<<<<<<< HEAD
 ELShift. Exp10  ::= Exp10 "<<" Exp11 ;
-=======
->>>>>>> d3329a9ca4c9ff5d4de84be33fefcfda6ee20a75
 ELt.     Exp9   ::= Exp9  "<"  Exp10 ;
 EGt.     Exp9   ::= Exp9  ">"  Exp10 ;
 ELtEq.   Exp9   ::= Exp9  "<=" Exp10 ;
@@ -56,10 +50,7 @@ EAnd.    Exp4   ::= Exp4  "&&" Exp5 ;
 EOr.     Exp3   ::= Exp3  "||" Exp4 ;
 EAss.    Exp2   ::= Exp3 "=" Exp2 ;
 
-<<<<<<< HEAD
 
-=======
->>>>>>> d3329a9ca4c9ff5d4de84be33fefcfda6ee20a75
 internal ETyped. Exp15 ::= "(" Exp ":" Type ")" ;
 
 coercions Exp 15 ;
@@ -71,7 +62,6 @@ rules Type   ::= "bool" | "int" | "double" | "void" | "string" ;
 token Id (letter (letter | digit | '_')*) ;
 
 separator nonempty Id "," ;
-<<<<<<< HEAD
 separator nonempty Elmt   "::" ;
 
 QConst. QualConst ::= [Elmt] ;
@@ -80,10 +70,3 @@ QCElmt. Elmt ::= Id        ;
 comment "#" ;
 comment "//" ;
 comment "/*" "*/" ;
-=======
-
-comment "#" ;
-comment "//" ;
-comment "/*" "*/" ;
-
->>>>>>> d3329a9ca4c9ff5d4de84be33fefcfda6ee20a75
