@@ -4,12 +4,12 @@ DFun.    Def    ::= Type Id "(" [Arg] ")" "{" [Stm] "}" ;
 
 terminator Def "" ;
 
-ADecl.   Arg    ::= Type Id ;
+ADecl.   Arg    ::= Type ArgListId ;
 
 separator Arg "," ;
 
 SExp.        Stm ::= Exp ";" ;
-SDecls.      Stm ::= Type [Id] ";" ;
+SDecls.      Stm ::= Type Id ";" ;
 SInit.       Stm ::= Type Id "=" Exp ";" ;
 SReturn.     Stm ::= "return" Exp ";" ;
 SReturnVoid. Stm ::= "return" ";" ;
@@ -24,13 +24,13 @@ EFalse.  Exp15  ::= "false" ;
 EInt.    Exp15  ::= Integer ;
 EDouble. Exp15  ::= Double ;
 EString. Exp15  ::= String ;
-EId.     Exp15  ::= Id ; 
+EId.     Exp15  ::= NameListId ;
 
 EApp.    Exp15  ::= Id "(" [Exp] ")" ;
 
 EPIncr.  Exp14  ::= Exp15 "++" ;
 EPDecr.  Exp14  ::= Exp15 "--" ;
-EQConst.  Exp15  ::= QualConst ;
+EQConst. Exp15  ::= QualConst  ;
 
 EIncr.   Exp13  ::= "++" Exp14 ;
 EDecr.   Exp13  ::= "--" Exp14 ;
@@ -61,10 +61,12 @@ rules Type   ::= "bool" | "int" | "double" | "void" | "string" ;
 
 token Id (letter (letter | digit | '_')*) ;
 
-separator nonempty Id "," ;
-separator nonempty Id "::" ;
+L1a. NameListId ::= Id ;                             
+L1b. NameListId ::= Id "::" NameListId ;                       
+L2a. ArgListId ::= Id ;                      
+L2b. ArgListId ::= Id "," ArgListId ;                      
 
-QConst. QualConst ::= [Id] ;
+QConst. QualConst ::= Id ;
 
 comment "#" ;
 comment "//" ;
