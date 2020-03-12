@@ -62,11 +62,10 @@ rules Type   ::= "bool" | "int" | "double" | "void" | "string" ;
 token Id (letter (letter | digit | '_')*) ;
 
 separator nonempty Id "," ;
-separator nonempty Elmt   "::" ;
+separator nonempty Id "::" ;
 
-QConst. QualConst ::= [Elmt] ;
+QConst. QualConst ::= [Id] ;
 
-QCElmt. Elmt ::= Id        ;
 comment "#" ;
 comment "//" ;
 comment "/*" "*/" ;
