@@ -6,5 +6,5 @@
 ### Instructions
 - bnfc -m -haskell CPP.cf
 - make
-- ./TestCPP <name of test file>
+- ./TestCPP '<'name of test file'>'
 - An abstract and linearized parse tree will be generated on success
