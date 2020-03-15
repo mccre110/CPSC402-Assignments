@@ -9,8 +9,9 @@ ADecl.   Arg    ::= Type ArgListId ;
 separator Arg "," ;
 
 SExp.        Stm ::= Exp ";" ;
-SDecls.      Stm ::= Type Id ";" ;
-SInit.       Stm ::= Type Id "=" Exp ";" ;
+SDecls.      Stm ::= NameListId Id ";" ;
+SInit.       Stm ::= NameListId Id "=" Exp ";" ;
+SInit2.      Stm ::= NameListId Id ">>" Exp ";" ;
 SReturn.     Stm ::= "return" Exp ";" ;
 SReturnVoid. Stm ::= "return" ";" ;
 SWhile.      Stm ::= "while" "(" Exp ")" Stm ;
@@ -30,7 +31,6 @@ EApp.    Exp15  ::= Id "(" [Exp] ")" ;
 
 EPIncr.  Exp14  ::= Exp15 "++" ;
 EPDecr.  Exp14  ::= Exp15 "--" ;
-EQConst. Exp15  ::= QualConst  ;
 
 EIncr.   Exp13  ::= "++" Exp14 ;
 EDecr.   Exp13  ::= "--" Exp14 ;
@@ -40,6 +40,7 @@ EDiv.    Exp12  ::= Exp12 "/"  Exp13 ;
 EPlus.   Exp11  ::= Exp11 "+"  Exp12 ;
 EMinus.  Exp11  ::= Exp11 "-"  Exp12 ;
 ELShift. Exp10  ::= Exp10 "<<" Exp11 ;
+ERShift. Exp10  ::= Exp11 ">>" Exp10 ;
 ELt.     Exp9   ::= Exp9  "<"  Exp10 ;
 EGt.     Exp9   ::= Exp9  ">"  Exp10 ;
 ELtEq.   Exp9   ::= Exp9  "<=" Exp10 ;
@@ -57,12 +58,13 @@ coercions Exp 15 ;
 
 separator Exp "," ;
 
-rules Type   ::= "bool" | "int" | "double" | "void" | "string" ;
+rules Type   ::= "bool" | "int" | "double" | "void" | "string";
 
 token Id (letter (letter | digit | '_')*) ;
 
-L1a. NameListId ::= Id ;                             
-L1b. NameListId ::= Id "::" NameListId ;                       
+L1a. NameListId ::= QualConst;
+L1c. NameListId ::= Type;                            
+L1b. NameListId ::= QualConst "::" NameListId;                       
 L2a. ArgListId ::= Id ;                      
 L2b. ArgListId ::= Id "," ArgListId ;                      
 
