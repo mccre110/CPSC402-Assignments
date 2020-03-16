@@ -1,6 +1,5 @@
 # the source files to be built
 SOURCES := CPP.cf
-CLASSP := .
 all:
 	bnfc -haskell $(SOURCES)
 	happy -gcai ParCPP.y
