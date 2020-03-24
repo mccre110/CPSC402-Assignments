@@ -1,36 +1,49 @@
 PDefs.   Program ::= [Def] ;
 
-DFun.    Def    ::= Type Id "(" [Arg] ")" "{" [Stm] "}" ;
+DFun.      Def    ::= Type Id "(" [Arg] ")" "{" [Stm] "}" ;
+DInline.   Def    ::= "inline" Def ;
+DTop.      Def    ::= TStm ";" ;
+DUsing.    Def    ::= "using" QConst ";" ;
+
+TopLevel.  TStm ::= "typedef" Dec ;
+Toplevel2. TStm ::= Type [Id]  ;
+Toplevel3. TStm ::= Dec "=" Exp ;
+Toplevel4. TStm ::= "struct" Id "{" [Dec] "}"  ;
 
 terminator Def "" ;
 
-ADecl.   Arg    ::= Type ArgListId ;
+ADecl.   Arg    ::= Dec ;
+ADecl2.  Arg    ::= Type ;
+ADecl3.  Arg    ::= Type Id "=" Exp ;
+ADecl4.  Arg    ::= "const" Type Id ;
+ADecl5.  Arg    ::= "const" Type "&" Id ;
 
 separator Arg "," ;
 
+Decl.  Dec ::= Type Id ;
+
+separator Dec ";" ;
+
 SExp.        Stm ::= Exp ";" ;
-SDecls.      Stm ::= Exp15 [Id] ";" ;
-SInit.       Stm ::= Exp15 [Id] "=" Exp ";" ;
+STopLevel.   Stm ::= TStm ";" ;
 SReturn.     Stm ::= "return" Exp ";" ;
 SReturnVoid. Stm ::= "return" ";" ;
 SWhile.      Stm ::= "while" "(" Exp ")" Stm ;
+SDoWhile.    Stm ::= "do" [Stm] ";" "while" "(" Exp ")" ";" ;
+SFor.        Stm ::= "for" "("  Exp ";" Exp ";" ")" Stm ";" ;
 SBlock.      Stm ::= "{" [Stm] "}" ;
 SIfElse.     Stm ::= "if" "(" Exp ")" Stm "else" Stm ;
 
 terminator Stm "" ;
 
-ETrue.   Exp15  ::= "true"  ;
+ETrue.   Exp15  ::= "true" ;
 EFalse.  Exp15  ::= "false" ;
 EInt.    Exp15  ::= Integer ;
-EDouble. Exp15  ::= Double  ;
-EString. Exp15  ::= String  ;
-EId.     Exp15  ::= Id      ;
-EType.   Exp15  ::= Type    ;
-
-ETypeList.    Exp15  ::= Id "<" [Type] ">" ;
-
+EDouble. Exp15  ::= Double ;
+EString. Exp15  ::= String ;
+EQConst. Exp15  ::= QConst ;
 EApp.    Exp15  ::= Id "(" [Exp] ")" ;
-EQConst. Exp15  ::= Exp15 "::" Exp15;
+
 EPIncr.  Exp14  ::= Exp15 "++" ;
 EPDecr.  Exp14  ::= Exp15 "--" ;
 
@@ -41,8 +54,8 @@ ETimes.  Exp12  ::= Exp12 "*"  Exp13 ;
 EDiv.    Exp12  ::= Exp12 "/"  Exp13 ;
 EPlus.   Exp11  ::= Exp11 "+"  Exp12 ;
 EMinus.  Exp11  ::= Exp11 "-"  Exp12 ;
-ELShift. Exp10  ::= Exp10 "<<" Exp11 ;
-ERShift. Exp10  ::= Exp15 ">>" Exp10 ;
+ELShift. Exp10  ::= Exp11 "<<" Exp10 ;
+ERShift. Exp10  ::= Exp11 ">>" Exp10 ;
 ELt.     Exp9   ::= Exp9  "<"  Exp10 ;
 EGt.     Exp9   ::= Exp9  ">"  Exp10 ;
 ELtEq.   Exp9   ::= Exp9  "<=" Exp10 ;
@@ -51,23 +64,30 @@ EEq.     Exp8   ::= Exp8  "==" Exp9 ;
 ENEq.    Exp8   ::= Exp8  "!=" Exp9 ;
 EAnd.    Exp4   ::= Exp4  "&&" Exp5 ;
 EOr.     Exp3   ::= Exp3  "||" Exp4 ;
-EAss.    Exp2   ::= Exp3  "="  Exp2 ;
-
+EAss.    Exp2   ::= Exp3 "=" Exp2 ;
 
 internal ETyped. Exp15 ::= "(" Exp ":" Type ")" ;
 
 coercions Exp 15 ;
 
-separator Exp ","  ;
-separator Type "," ;
-separator nonempty Id "," ;
+separator Exp "," ;
 
-rules Type   ::= "bool" | "int" | "double" | "void" | "string";
+rules Type   ::= "bool" | "int" | "double" | "void" | QConst;
+
+separator Type "," ;
 
 token Id (letter (letter | digit | '_')*) ;
-                      
-L2a. ArgListId ::= Id ;                      
-L2b. ArgListId ::= Id "," ArgListId ;    
+
+separator nonempty Id "," ;
+
+QualConst. QConst ::= [ConstName] ;
+
+CName.  ConstName ::= Id    ;
+CName2. ConstName ::= TempInst ;
+
+separator nonempty ConstName "::" ; 
+
+TInstant. TempInst ::= ConstName "<" [Type] ">" ;
 
 comment "#" ;
 comment "//" ;
