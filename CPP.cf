@@ -49,7 +49,7 @@ EInd.    Exp15  ::= Exp15 "[" Exp "]" ;
 EPIncr.  Exp14  ::= Exp15 "++" ;
 EPDecr.  Exp14  ::= Exp15 "--" ;
 EProj.   Exp14  ::= Exp15 "." Exp14 ;
-EProj.   Exp14  ::= Exp15 "->" Exp14 ;
+EProj2.  Exp14  ::= Exp15 "->" Exp14 ;
 
 EIncr.   Exp13  ::= "++" Exp14 ;
 EDecr.   Exp13  ::= "--" Exp14 ;
@@ -70,7 +70,8 @@ ENEq.    Exp8   ::= Exp8  "!=" Exp9 ;
 EAnd.    Exp4   ::= Exp4  "&&" Exp5 ;
 EOr.     Exp3   ::= Exp3  "||" Exp4 ;
 EAss.    Exp2   ::= Exp3 "=" Exp2 ;
-ECond.   Exp1   ::= Exp   "?"  Exp3 ":" Exp3 ;
+ECond.   Exp1   ::= Exp1 "?"  Exp2 ":" Exp3 ;
+EExcept. Exp1   ::= "throw" Exp ;
 
 internal ETyped. Exp15 ::= "(" Exp ":" Type ")" ;
 
