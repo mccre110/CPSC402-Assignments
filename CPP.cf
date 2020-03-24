@@ -32,6 +32,7 @@ SWhile.      Stm ::= "while" "(" Exp ")" Stm ;
 SDoWhile.    Stm ::= "do" [Stm] ";" "while" "(" Exp ")" ";" ;
 SFor.        Stm ::= "for" "("  Exp ";" Exp ";" ")" Stm ";" ;
 SBlock.      Stm ::= "{" [Stm] "}" ;
+SIf.         Stm ::= "if" "(" Exp ")" Stm ;
 SIfElse.     Stm ::= "if" "(" Exp ")" Stm "else" Stm ;
 
 terminator Stm "" ;
@@ -43,6 +44,7 @@ EDouble. Exp15  ::= Double ;
 EString. Exp15  ::= [String] ;
 EQConst. Exp15  ::= QConst ;
 EApp.    Exp15  ::= Id "(" [Exp] ")" ;
+EInd.    Exp15  ::= Exp15 "[" Exp "]" ;
 
 EPIncr.  Exp14  ::= Exp15 "++" ;
 EPDecr.  Exp14  ::= Exp15 "--" ;
@@ -54,6 +56,7 @@ EDecr.   Exp13  ::= "--" Exp14 ;
 
 ETimes.  Exp12  ::= Exp12 "*"  Exp13 ;
 EDiv.    Exp12  ::= Exp12 "/"  Exp13 ;
+EMod.    Exp12  ::= Exp12 "%"  Exp13 ;
 EPlus.   Exp11  ::= Exp11 "+"  Exp12 ;
 EMinus.  Exp11  ::= Exp11 "-"  Exp12 ;
 ELShift. Exp10  ::= Exp11 "<<" Exp10 ;
@@ -67,6 +70,7 @@ ENEq.    Exp8   ::= Exp8  "!=" Exp9 ;
 EAnd.    Exp4   ::= Exp4  "&&" Exp5 ;
 EOr.     Exp3   ::= Exp3  "||" Exp4 ;
 EAss.    Exp2   ::= Exp3 "=" Exp2 ;
+ECond.   Exp1   ::= Exp   "?"  Exp3 ":" Exp3 ;
 
 internal ETyped. Exp15 ::= "(" Exp ":" Type ")" ;
 
