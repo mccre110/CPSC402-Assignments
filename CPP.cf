@@ -40,7 +40,7 @@ ETrue.   Exp15  ::= "true" ;
 EFalse.  Exp15  ::= "false" ;
 EInt.    Exp15  ::= Integer ;
 EDouble. Exp15  ::= Double ;
-EString. Exp15  ::= String ;
+EString. Exp15  ::= [String] ;
 EQConst. Exp15  ::= QConst ;
 EApp.    Exp15  ::= Id "(" [Exp] ")" ;
 
@@ -75,6 +75,7 @@ separator Exp "," ;
 rules Type   ::= "bool" | "int" | "double" | "void" | QConst;
 
 separator Type "," ;
+separator nonempty String "" ;
 
 token Id (letter (letter | digit | '_')*) ;
 
@@ -82,7 +83,7 @@ separator nonempty Id "," ;
 
 QualConst. QConst ::= [ConstName] ;
 
-CName.  ConstName ::= Id    ;
+CName.  ConstName ::= Id ;
 CName2. ConstName ::= TempInst ;
 
 separator nonempty ConstName "::" ; 
