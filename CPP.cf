@@ -18,18 +18,18 @@ TSInit3.   TStm ::= Type "&" Id "=" Exp ;
 terminator Def "" ;
 
 ADecl.   Arg    ::= Dec ;
-ArgDecl2. Arg   ::= Type ;
-ArgDecl3. Arg   ::= Type "&" ;
+ADecl2.  Arg    ::= Type ;
+ADecl3.  Arg    ::= Type "&" ;
 ADecl4.  Arg    ::= Type "&" Id ;
 ADecl5.  Arg    ::= Type "&" Id "=" Exp ;
 ADecl5.  Arg    ::= Type Id "=" Exp ;
 
-ADeclwoo.   Arg    ::= "const" Dec ;
-ArgDecl2woo. Arg   ::= "const" Type ;
-ArgDecl3woo. Arg   ::= "const" Type "&" ;
-ADecl4woo.  Arg    ::= "const" Type "&" Id ;
-ADecl5woo.  Arg    ::= "const" Type "&" Id "=" Exp ;
-ADecl5woo.  Arg    ::= "const" Type Id "=" Exp ;
+CADecl.   Arg    ::= "const" Dec ;
+CADecl2.  Arg    ::= "const" Type ;
+CADecl3.  Arg    ::= "const" Type "&" ;
+CADecl4.  Arg    ::= "const" Type "&" Id ;
+CADecl5.  Arg    ::= "const" Type "&" Id "=" Exp ;
+CADecl6.  Arg    ::= "const" Dec "=" Exp ;
 
 separator Arg  "," ;
 
@@ -45,7 +45,7 @@ SReturn.     Stm ::= "return" Exp ";" ;
 SReturnVoid. Stm ::= "return" ";" ;
 SWhile.      Stm ::= "while" "(" Exp ")" Stm ;
 SDoWhile.    Stm ::= "do" Stm "while" "(" Exp ")" ";" ;
-SFor.        Stm ::= "for" "(" Stm  Exp ";" Exp ")" Stm ;
+SFor.        Stm ::= "for" "(" Arg ";" Exp ";" Exp ")" Stm ;
 SBlock.      Stm ::= "{" [Stm] "}" ;
 SIf.         Stm ::= "if" "(" Exp ")" Stm ;
 SIfElse.     Stm ::= "if" "(" Exp ")" Stm "else" Stm ;
