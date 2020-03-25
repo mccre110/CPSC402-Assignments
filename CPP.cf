@@ -1,7 +1,9 @@
 PDefs.   Program ::= [Def] ;
 
 DFun.      Def    ::= Type Id "(" [Arg] ")" "{" [Stm] "}" ;
-DInline.   Def    ::= "inline" Def ;
+DFunc.     Def    ::= Type Id "(" [Arg] ")" ";" ;
+DInline.   Def    ::= "inline" Type Id "(" [Arg] ")" "{" [Stm] "}" ;
+DInline2.  Def    ::= "inline" Type Id "(" [Arg] ")" ";" ;
 DTop.      Def    ::= TStm ";" ;
 DUsing.    Def    ::= "using" QConst ";" ;
 
@@ -9,16 +11,22 @@ TopLevel.  TStm ::= "typedef" Dec ;
 Toplevel2. TStm ::= Type [Id]  ;
 Toplevel3. TStm ::= Dec "=" Exp ;
 Toplevel4. TStm ::= "struct" Id "{" [Dec] "}"  ;
+TSInit.    TStm ::= "const" Type Id "=" Exp ;
+TSInit2.   TStm ::= "const" Type "&" Id "=" Exp ;
+TSInit3.   TStm ::= Type "&" Id "=" Exp ;
 
 terminator Def "" ;
 
 ADecl.   Arg    ::= Dec ;
-ADecl2.  Arg    ::= Type ;
-ADecl3.  Arg    ::= Type Id "=" Exp ;
-ADecl4.  Arg    ::= "const" Type Id ;
-ADecl5.  Arg    ::= "const" Type "&" Id ;
+ADecl2.  Arg    ::= "const" Arg ;
+ArgDecl2. Arg   ::= Type ;
+ArgDecl3. Arg   ::= Type "&" ;
+ADecl4.  Arg    ::= Type "&" Id ;
+ADecl5.  Arg    ::= Type "&" Id "=" Exp ;
+ADecl5.  Arg    ::= Type Id "=" Exp ;
 
-separator Arg "," ;
+
+separator Arg  "," ;
 
 Decl.  Dec ::= Type Id ;
 
@@ -29,8 +37,8 @@ STopLevel.   Stm ::= TStm ";" ;
 SReturn.     Stm ::= "return" Exp ";" ;
 SReturnVoid. Stm ::= "return" ";" ;
 SWhile.      Stm ::= "while" "(" Exp ")" Stm ;
-SDoWhile.    Stm ::= "do" [Stm] ";" "while" "(" Exp ")" ";" ;
-SFor.        Stm ::= "for" "("  Exp ";" Exp ";" ")" Stm ";" ;
+SDoWhile.    Stm ::= "do" Stm "while" "(" Exp ")" ";" ;
+SFor.        Stm ::= "for" "(" Stm  Exp ";" Exp ")" Stm ;
 SBlock.      Stm ::= "{" [Stm] "}" ;
 SIf.         Stm ::= "if" "(" Exp ")" Stm ;
 SIfElse.     Stm ::= "if" "(" Exp ")" Stm "else" Stm ;
@@ -42,10 +50,12 @@ EFalse.  Exp15  ::= "false" ;
 EInt.    Exp15  ::= Integer ;
 EDouble. Exp15  ::= Double ;
 EString. Exp15  ::= [String] ;
+EChar.   Exp15  ::= Char   ;
 EQConst. Exp15  ::= QConst ;
 EApp.    Exp15  ::= Id "(" [Exp] ")" ;
 EInd.    Exp15  ::= Exp15 "[" Exp "]" ;
 
+EDRef.   Exp14  ::= "*" QConst ;
 EPIncr.  Exp14  ::= Exp15 "++" ;
 EPDecr.  Exp14  ::= Exp15 "--" ;
 EProj.   Exp14  ::= Exp15 "." Exp14 ;
@@ -53,6 +63,7 @@ EProj2.  Exp14  ::= Exp15 "->" Exp14 ;
 
 EIncr.   Exp13  ::= "++" Exp14 ;
 EDecr.   Exp13  ::= "--" Exp14 ;
+ENeg.    Exp13  ::= "!"  Exp14 ;
 
 ETimes.  Exp12  ::= Exp12 "*"  Exp13 ;
 EDiv.    Exp12  ::= Exp12 "/"  Exp13 ;
@@ -70,7 +81,9 @@ ENEq.    Exp8   ::= Exp8  "!=" Exp9 ;
 EAnd.    Exp4   ::= Exp4  "&&" Exp5 ;
 EOr.     Exp3   ::= Exp3  "||" Exp4 ;
 EAss.    Exp2   ::= Exp3 "=" Exp2 ;
-ECond.   Exp1   ::= Exp1 "?"  Exp2 ":" Exp3 ;
+EMe.     Exp2   ::= Exp3 "-=" Exp2 ;
+EPe.     Exp2   ::= Exp3 "+=" Exp2 ; 
+ECond.   Exp2   ::= Exp2 "?"  Exp3 ":" Exp4 ;
 EExcept. Exp1   ::= "throw" Exp ;
 
 internal ETyped. Exp15 ::= "(" Exp ":" Type ")" ;
@@ -79,7 +92,7 @@ coercions Exp 15 ;
 
 separator Exp "," ;
 
-rules Type   ::= "bool" | "int" | "double" | "void" | QConst;
+rules Type   ::= "bool" | "int" | "double" | "void" | QConst ;
 
 separator Type "," ;
 separator nonempty String "" ;
@@ -95,7 +108,7 @@ CName2. ConstName ::= TempInst ;
 
 separator nonempty ConstName "::" ; 
 
-TInstant. TempInst ::= ConstName "<" [Type] ">" ;
+TInstant. TempInst ::= Id "<" [Type] ">" ;
 
 comment "#" ;
 comment "//" ;
