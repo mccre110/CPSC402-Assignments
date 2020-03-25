@@ -1,36 +1,43 @@
 PDefs.   Program ::= [Def] ;
 
-DFun.      Def    ::= Type Id "(" [Arg] ")" "{" [Stm] "}" ;
-DFunc.     Def    ::= Type Id "(" [Arg] ")" ";" ;
-DInline.   Def    ::= "inline" Type Id "(" [Arg] ")" "{" [Stm] "}" ;
-DInline2.  Def    ::= "inline" Type Id "(" [Arg] ")" ";" ;
+DFun.      Def    ::= Dec "(" [Arg] ")" "{" [Stm] "}" ;
+DFunc.     Def    ::= Dec "(" [Arg] ")" ";" ;
+DInline.   Def    ::= "inline" Dec "(" [Arg] ")" "{" [Stm] "}" ;
+DInline2.  Def    ::= "inline" Dec "(" [Arg] ")" ";" ;
 DTop.      Def    ::= TStm ";" ;
 DUsing.    Def    ::= "using" QConst ";" ;
 
 TopLevel.  TStm ::= "typedef" Dec ;
 Toplevel2. TStm ::= Type [Id]  ;
 Toplevel3. TStm ::= Dec "=" Exp ;
-Toplevel4. TStm ::= "struct" Id "{" [Dec] "}"  ;
-TSInit.    TStm ::= "const" Type Id "=" Exp ;
+Toplevel4. TStm ::= "struct" Id "{" [Parameter] "}"  ;
+TSInit.    TStm ::= "const" Dec "=" Exp ;
 TSInit2.   TStm ::= "const" Type "&" Id "=" Exp ;
 TSInit3.   TStm ::= Type "&" Id "=" Exp ;
 
 terminator Def "" ;
 
 ADecl.   Arg    ::= Dec ;
-ADecl2.  Arg    ::= "const" Arg ;
 ArgDecl2. Arg   ::= Type ;
 ArgDecl3. Arg   ::= Type "&" ;
 ADecl4.  Arg    ::= Type "&" Id ;
 ADecl5.  Arg    ::= Type "&" Id "=" Exp ;
 ADecl5.  Arg    ::= Type Id "=" Exp ;
 
+ADeclwoo.   Arg    ::= "const" Dec ;
+ArgDecl2woo. Arg   ::= "const" Type ;
+ArgDecl3woo. Arg   ::= "const" Type "&" ;
+ADecl4woo.  Arg    ::= "const" Type "&" Id ;
+ADecl5woo.  Arg    ::= "const" Type "&" Id "=" Exp ;
+ADecl5woo.  Arg    ::= "const" Type Id "=" Exp ;
 
 separator Arg  "," ;
 
 Decl.  Dec ::= Type Id ;
 
-separator Dec ";" ;
+Param. Parameter ::= Dec ";" ;
+
+separator Parameter "" ;
 
 SExp.        Stm ::= Exp ";" ;
 STopLevel.   Stm ::= TStm ";" ;
@@ -94,7 +101,7 @@ separator Exp "," ;
 
 rules Type   ::= "bool" | "int" | "double" | "void" | QConst ;
 
-separator Type "," ;
+separator nonempty Type "," ;
 separator nonempty String "" ;
 
 token Id (letter (letter | digit | '_')*) ;
