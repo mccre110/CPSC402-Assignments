@@ -1,6 +1,6 @@
 # CPSC402-Assignments
 ## Professor Kurz - Spring 2020
-Corey McCrea, Chase Toyofuku-Souza, Eric Lim, Ryan Kassab
+Corey McCrea, Chase Toyofuku-Souza, Eric Lim, Ryan Kassab, Michelle Kutsanov
 
 
 Prerequisites, MATH 250, CPSC 350, CPSC 354. 
