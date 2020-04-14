@@ -1,5 +1,5 @@
 # CPSC-402 Assignment 3 (Type checker for C++)
-## Chase Toyofuku-Souza, Corey McCrea, Ryan Kassab, Eric Lim
+## Chase Toyofuku-Souza, Corey McCrea, Ryan Kassab, Eric Lim, Michelle Kutsanov
 ## About
 A typechecker for a fragment of the C++ programming language. The type checker returns an "OK" at success, and reports a type error at failure. It is implemented in Haskell. 
 
