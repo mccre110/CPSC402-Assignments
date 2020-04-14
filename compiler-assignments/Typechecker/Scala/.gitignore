@@ -1,5 +1,0 @@
-*.class
-*.log
-.DS_Store
-project/*
-target/*
