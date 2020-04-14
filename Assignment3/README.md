@@ -1,27 +1,13 @@
-# CPPTypeChecker
+# CPSC-402 Assignment 3 (Type checker for C++)
+## Chase Toyofuku-Souza, Corey McCrea, Ryan Kassab, Eric Lim, Michelle Kutsanov
+## About
+A typechecker for a fragment of the C++ programming language. The type checker returns an "OK" at success, and reports a type error at failure. It is implemented in Haskell. 
 
-A type checker for a subset of C++ written in Haskell.
+### Files
+- TypeChecker.hs
 
-Set up and written by Samuel Balco following Chapter 4 of [Implementing Programming Languages](http://www.grammaticalframework.org/ipl-book/) by Aarne Ranta and the corresponding [Assignment 2](http://www.grammaticalframework.org/ipl-book/assignments/assignment2/assignment2.html).
-
-To compile run `stack build` and to test run `stack test`.
-
-To run typechecking on a specific file, run `stack exec CPPTypeChecker-exe <file_path>.cc`.
-
-The files produced by bnfc are in src:
-
-	AbsCpp.hs
-	ErrM.hs
-	LexCpp.hs
-	ParCpp.hs
-	PrintCpp.hs
-
-The template for the typechecker is in `TypeChecker.hs`. This where you will find the code that you need to complete.
-
-To know which cases you need to add, look at the grammar as well as at the algebraic data type for abstract syntax trees defined in `AbsCpp.hs`.
-
-The error monad that is used to modify the type `Type` of CPP-types is defined in `ErrM.hs`.
-
-
-I keep an updating [list with tips](https://hackmd.io/nVQP-fp-TEWUbp9kecaLTQ).
-
+### Submission 1 Problems
+- The provided template passes `do_nothing.cc` and `void_return_empty.cc`
+- The typechecking rules already implemented are SExp, SDecls, SReturn, EInt, ETimes, EAss and ETyped. 
+- The rule that needs to be added to typecheck `easy_add.cc` is EPlus, under inferTypeExp.
+- In order to to typecheck the program `ass_easy.cc`, we must add the rules EId and SInit. SInit is used to initialize an Id with the value of an Exp. EId is used to infer the type of the Id, so that SInit will properly evaluate if the types of both sides are matching.
