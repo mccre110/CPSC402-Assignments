@@ -162,13 +162,17 @@ inferTypeExp env (EAss e1 e2) = do
 inferTypeExp env (ETyped e ty) = do
     checkExp env e ty
     return ty
-inferTypeExp env (EPIncr e) =
+inferTypeExp env (EPIncr e) = do
+    checkExp env e Type_int
     return Type_int
-inferTypeExp env (EIncr e) =
+inferTypeExp env (EIncr e) = do
+    checkExp env e Type_int
     return Type_int
-inferTypeExp env (EPDecr e) =
+inferTypeExp env (EPDecr e) = do
+    checkExp env e Type_int
     return Type_int
-inferTypeExp env (EDecr e) =
+inferTypeExp env (EDecr e) = do
+    checkExp env e Type_int
     return Type_int
 inferTypeExp env (EApp id exps) = do
     funcSig <- lookupFun env id
@@ -203,7 +207,7 @@ inferTypeExp env (EAnd e1 e2) = do
     ty <- inferTypeExp env e1
     checkExp env e2 Type_bool
     return Type_bool
-inferTypeExp env (EEq e1 e2) = do
+inferTypeExp env (EOr e1 e2) = do
     ty <- inferTypeExp env e1
     checkExp env e2 Type_bool
     return Type_bool
