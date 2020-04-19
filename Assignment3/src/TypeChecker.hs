@@ -119,9 +119,16 @@ checkStm env (SReturn e) ty = do
     checkExp env e ty
     return env
 checkStm env (SInit ty' id e) ty = do
+    id <- lookupVar id env
+    if () then else do
     env' <- insertVar env id ty'
     checkExp env' e ty'
     return env'
+checkStm env (SIfElse e s1 s2) ty = do
+    checkExp env e Type_bool
+    checkStm env s1 ty
+    checkStm env s2 ty
+    return env
 {-
 Here need to go the missing cases. Once you have all cases you can delete the next line which is only needed to catch all cases that are not yet implemented.
 -}
@@ -148,6 +155,38 @@ inferTypeExp env (EAss e1 e2) = do
 inferTypeExp env (ETyped e ty) = do
     checkExp env e ty
     return ty
+inferTypeExp env (EPIncr e) =
+    return Type_int
+inferTypeExp env (EIncr e) =
+    return Type_int
+inferTypeExp env (EPDecr e) =
+    return Type_int
+inferTypeExp env (EDecr e) =
+    return Type_int
+inferTypeExp env (EApp id exs) = do
+    ty <- lookupVar id env
+    return ty
+inferTypeExp env (EEq e1 e2) = do
+    ty <- inferTypeExp env e1
+    checkExp env e2 ty
+    return Type_bool
+inferTypeExp env (ELt e1 e2) = do
+    ty <- inferTypeExp env e1
+    checkExp env e2 ty
+    return Type_bool
+inferTypeExp env (EGt e1 e2) = do
+    ty <- inferTypeExp env e1
+    checkExp env e2 ty
+    return Type_bool
+inferTypeExp env (ELtEq e1 e2) = do
+    ty <- inferTypeExp env e1
+    checkExp env e2 ty
+    return Type_bool
+inferTypeExp env (EGtEq e1 e2) = do
+    ty <- inferTypeExp env e1
+    checkExp env e2 ty
+    return Type_bool
+
 {-
 Here need to go the missing cases. Once you have all cases you can delete the next line which is only needed to catch all cases that are not yet implemented.
 -}
