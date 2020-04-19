@@ -119,8 +119,6 @@ checkStm env (SReturn e) ty = do
     checkExp env e ty
     return env
 checkStm env (SInit ty' id e) ty = do
-    id <- lookupVar id env
-    if () then else do
     env' <- insertVar env id ty'
     checkExp env' e ty'
     return env'
@@ -129,6 +127,11 @@ checkStm env (SIfElse e s1 s2) ty = do
     checkStm env s1 ty
     checkStm env s2 ty
     return env
+checkStm env (SWhile e s) ty = do
+    checkExp env e Type_bool
+    checkStm env s ty
+    return env
+
 {-
 Here need to go the missing cases. Once you have all cases you can delete the next line which is only needed to catch all cases that are not yet implemented.
 -}
@@ -146,7 +149,11 @@ inferTypeExp env (EId id) = do
     return ty
 inferTypeExp env (ETimes e1 e2) = 
     inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e1 [e2]
+inferTypeExp env (EDiv e1 e2) = 
+    inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e1 [e2]
 inferTypeExp env (EPlus e1 e2) = 
+    inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e1 [e2]
+inferTypeExp env (EMinus e1 e2) = 
     inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e1 [e2]
 inferTypeExp env (EAss e1 e2) = do
     ty <- inferTypeExp env e1
@@ -163,10 +170,16 @@ inferTypeExp env (EPDecr e) =
     return Type_int
 inferTypeExp env (EDecr e) =
     return Type_int
-inferTypeExp env (EApp id exs) = do
-    ty <- lookupVar id env
-    return ty
+inferTypeExp env (EApp id exps) = do
+    funcSig <- lookupFun env id
+    forM_ (zip exps (fst funcSig)) (\p -> checkExp  env (fst p) (snd p))
+    return (snd funcSig)
+
 inferTypeExp env (EEq e1 e2) = do
+    ty <- inferTypeExp env e1
+    checkExp env e2 ty
+    return Type_bool
+inferTypeExp env (ENEq e1 e2) = do
     ty <- inferTypeExp env e1
     checkExp env e2 ty
     return Type_bool
@@ -185,6 +198,14 @@ inferTypeExp env (ELtEq e1 e2) = do
 inferTypeExp env (EGtEq e1 e2) = do
     ty <- inferTypeExp env e1
     checkExp env e2 ty
+    return Type_bool
+inferTypeExp env (EAnd e1 e2) = do
+    ty <- inferTypeExp env e1
+    checkExp env e2 Type_bool
+    return Type_bool
+inferTypeExp env (EEq e1 e2) = do
+    ty <- inferTypeExp env e1
+    checkExp env e2 Type_bool
     return Type_bool
 
 {-
