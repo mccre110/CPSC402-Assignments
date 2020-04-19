@@ -131,7 +131,10 @@ checkStm env (SWhile e s) ty = do
     checkExp env e Type_bool
     checkStm env s ty
     return env
-
+checkStm env (SBlock stms) ty =
+    -- newBlock `env
+    -- return env
+    foldM (\e s -> checkStm env s ty) env stms
 {-
 Here need to go the missing cases. Once you have all cases you can delete the next line which is only needed to catch all cases that are not yet implemented.
 -}
@@ -152,7 +155,7 @@ inferTypeExp env (ETimes e1 e2) =
 inferTypeExp env (EDiv e1 e2) = 
     inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e1 [e2]
 inferTypeExp env (EPlus e1 e2) = 
-    inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e1 [e2]
+    inferTypeOverloadedExp env (Alternative [Type_int,Type_double, Type_string]) e1 [e2]
 inferTypeExp env (EMinus e1 e2) = 
     inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e1 [e2]
 inferTypeExp env (EAss e1 e2) = do
@@ -163,18 +166,17 @@ inferTypeExp env (ETyped e ty) = do
     checkExp env e ty
     return ty
 inferTypeExp env (EPIncr e) =
-    return Type_int
+    inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e []
 inferTypeExp env (EIncr e) =
-    return Type_int
+    inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e []
 inferTypeExp env (EPDecr e) =
-    return Type_int
+    inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e []
 inferTypeExp env (EDecr e) =
-    return Type_int
+    inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e []
 inferTypeExp env (EApp id exps) = do
     funcSig <- lookupFun env id
     forM_ (zip exps (fst funcSig)) (\p -> checkExp  env (fst p) (snd p))
     return (snd funcSig)
-
 inferTypeExp env (EEq e1 e2) = do
     ty <- inferTypeExp env e1
     checkExp env e2 ty
@@ -203,7 +205,7 @@ inferTypeExp env (EAnd e1 e2) = do
     ty <- inferTypeExp env e1
     checkExp env e2 Type_bool
     return Type_bool
-inferTypeExp env (EEq e1 e2) = do
+inferTypeExp env (EOr e1 e2) = do
     ty <- inferTypeExp env e1
     checkExp env e2 Type_bool
     return Type_bool
@@ -211,6 +213,7 @@ inferTypeExp env (EEq e1 e2) = do
 {-
 Here need to go the missing cases. Once you have all cases you can delete the next line which is only needed to catch all cases that are not yet implemented.
 -}
+
 inferTypeExp _ e = fail $ "Missing case in inferTypeExp encountered:\n" ++ printTree e
 
 inferTypeOverloadedExp :: Env -> Alternative Type -> Exp -> [Exp] -> Err Type
