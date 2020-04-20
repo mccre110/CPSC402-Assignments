@@ -3,7 +3,7 @@
 ## About
 A typechecker for a fragment of the C++ programming language. The type checker returns an "OK" at success, and reports a type error at failure. It is implemented in Haskell. 
 
-### Files
+### Files Modified
 - TypeChecker.hs
 
 ### Submission 1 Problems
