@@ -131,8 +131,9 @@ checkStm env (SWhile e s) ty = do
     checkExp env e Type_bool
     foldM(\e s -> checkStm e s ty) (newBlock env) [s]
     return env
-checkStm env (SBlock stms) ty =
+checkStm env (SBlock stms) ty = do
     foldM (\e s -> checkStm e s ty) (newBlock env) stms
+    return env
 {-
 Here need to go the missing cases. Once you have all cases you can delete the next line which is only needed to catch all cases that are not yet implemented.
 -}
@@ -184,13 +185,23 @@ inferTypeExp env (ENEq e1 e2) = do
     checkExp env e2 ty
     return Type_bool
 inferTypeExp env (ELt e1 e2) = do
-    ty <- inferTypeExp env e1
-    checkExp env e2 ty
-    return Type_bool
+    if (e1 == ETrue) then fail "No True/False in comparison statements.\n"
+    else if (e1 == EFalse) then fail "No True/False in comparison statements.\n"
+    else if (e2 == ETrue) then fail "No True/False in comparison statements.\n"
+    else if (e2 == EFalse) then fail "No True/False in comparison statements.\n"
+    else do
+        ty <- inferTypeExp env e1
+        checkExp env e2 ty
+        return Type_bool
 inferTypeExp env (EGt e1 e2) = do
-    ty <- inferTypeExp env e1
-    checkExp env e2 ty
-    return Type_bool
+    if (e1 == ETrue) then fail "No True/False in comparison statements.\n"
+    else if (e1 == EFalse) then fail "No True/False in comparison statements.\n"
+    else if (e2 == ETrue) then fail "No True/False in comparison statements.\n"
+    else if (e2 == EFalse) then fail "No True/False in comparison statements.\n"
+    else do
+        ty <- inferTypeExp env e1
+        checkExp env e2 ty
+        return Type_bool
 inferTypeExp env (ELtEq e1 e2) = do
     ty <- inferTypeExp env e1
     checkExp env e2 ty
