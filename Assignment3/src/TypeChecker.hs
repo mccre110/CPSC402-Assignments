@@ -174,7 +174,8 @@ inferTypeExp env (EDecr e) =
     inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e []
 inferTypeExp env (EApp id exps) = do
     funcSig <- lookupFun env id
-    forM_ (zip exps (fst funcSig)) (\p -> checkExp  env (fst p) (snd p))
+    if (length (fst funcSig) /= (length exps)) then fail "Incorrect number of arguments"
+    else do forM_ (zip exps (fst funcSig)) (\p -> checkExp  env (fst p) (snd p))
     return (snd funcSig)
 inferTypeExp env (EEq e1 e2) = do
     ty <- inferTypeExp env e1
@@ -185,19 +186,13 @@ inferTypeExp env (ENEq e1 e2) = do
     checkExp env e2 ty
     return Type_bool
 inferTypeExp env (ELt e1 e2) = do
-    if (e1 == ETrue) then fail "No True/False in comparison statements.\n"
-    else if (e1 == EFalse) then fail "No True/False in comparison statements.\n"
-    else if (e2 == ETrue) then fail "No True/False in comparison statements.\n"
-    else if (e2 == EFalse) then fail "No True/False in comparison statements.\n"
+    if (e1 == ETrue || e1 == EFalse ||e2 == ETrue || e2 == EFalse) then fail "No True/False in comparison statements.\n"
     else do
         ty <- inferTypeExp env e1
         checkExp env e2 ty
         return Type_bool
 inferTypeExp env (EGt e1 e2) = do
-    if (e1 == ETrue) then fail "No True/False in comparison statements.\n"
-    else if (e1 == EFalse) then fail "No True/False in comparison statements.\n"
-    else if (e2 == ETrue) then fail "No True/False in comparison statements.\n"
-    else if (e2 == EFalse) then fail "No True/False in comparison statements.\n"
+    if (e1 == ETrue || e1 == EFalse ||e2 == ETrue || e2 == EFalse) then fail "No True/False in comparison statements.\n"
     else do
         ty <- inferTypeExp env e1
         checkExp env e2 ty
