@@ -131,13 +131,9 @@ checkStm env (SWhile e s) ty = do
     checkExp env e Type_bool
     foldM(\e s -> checkStm e s ty) (newBlock env) [s]
     return env
-checkStm env (SBlock stms) ty =
+checkStm env (SBlock stms) ty = do
     foldM (\e s -> checkStm e s ty) (newBlock env) stms
-{-
-Here need to go the missing cases. Once you have all cases you can delete the next line which is only needed to catch all cases that are not yet implemented.
--}
-checkStm _ s _ = fail $ "Missing case in checkStm encountered:\n" ++ printTree s
-
+    return env
 
 inferTypeExp :: Env -> Exp -> Err Type
 inferTypeExp env (EInt _) = return Type_int
@@ -173,7 +169,8 @@ inferTypeExp env (EDecr e) =
     inferTypeOverloadedExp env (Alternative [Type_int,Type_double]) e []
 inferTypeExp env (EApp id exps) = do
     funcSig <- lookupFun env id
-    forM_ (zip exps (fst funcSig)) (\p -> checkExp  env (fst p) (snd p))
+    if (length (fst funcSig) /= (length exps)) then fail "Incorrect number of arguments"
+    else do forM_ (zip exps (fst funcSig)) (\p -> checkExp  env (fst p) (snd p))
     return (snd funcSig)
 inferTypeExp env (EEq e1 e2) = do
     ty <- inferTypeExp env e1
@@ -184,13 +181,17 @@ inferTypeExp env (ENEq e1 e2) = do
     checkExp env e2 ty
     return Type_bool
 inferTypeExp env (ELt e1 e2) = do
-    ty <- inferTypeExp env e1
-    checkExp env e2 ty
-    return Type_bool
+    if (e1 == ETrue || e1 == EFalse ||e2 == ETrue || e2 == EFalse) then fail "No True/False in comparison statements.\n"
+    else do
+        ty <- inferTypeExp env e1
+        checkExp env e2 ty
+        return Type_bool
 inferTypeExp env (EGt e1 e2) = do
-    ty <- inferTypeExp env e1
-    checkExp env e2 ty
-    return Type_bool
+    if (e1 == ETrue || e1 == EFalse ||e2 == ETrue || e2 == EFalse) then fail "No True/False in comparison statements.\n"
+    else do
+        ty <- inferTypeExp env e1
+        checkExp env e2 ty
+        return Type_bool
 inferTypeExp env (ELtEq e1 e2) = do
     ty <- inferTypeExp env e1
     checkExp env e2 ty
@@ -207,12 +208,6 @@ inferTypeExp env (EOr e1 e2) = do
     ty <- inferTypeExp env e1
     checkExp env e2 Type_bool
     return Type_bool
-
-{-
-Here need to go the missing cases. Once you have all cases you can delete the next line which is only needed to catch all cases that are not yet implemented.
--}
-
-inferTypeExp _ e = fail $ "Missing case in inferTypeExp encountered:\n" ++ printTree e
 
 inferTypeOverloadedExp :: Env -> Alternative Type -> Exp -> [Exp] -> Err Type
 inferTypeOverloadedExp env (Alternative ts) e es = do
