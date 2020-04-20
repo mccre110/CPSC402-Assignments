@@ -134,11 +134,6 @@ checkStm env (SWhile e s) ty = do
 checkStm env (SBlock stms) ty = do
     foldM (\e s -> checkStm e s ty) (newBlock env) stms
     return env
-{-
-Here need to go the missing cases. Once you have all cases you can delete the next line which is only needed to catch all cases that are not yet implemented.
--}
-checkStm _ s _ = fail $ "Missing case in checkStm encountered:\n" ++ printTree s
-
 
 inferTypeExp :: Env -> Exp -> Err Type
 inferTypeExp env (EInt _) = return Type_int
@@ -213,12 +208,6 @@ inferTypeExp env (EOr e1 e2) = do
     ty <- inferTypeExp env e1
     checkExp env e2 Type_bool
     return Type_bool
-
-{-
-Here need to go the missing cases. Once you have all cases you can delete the next line which is only needed to catch all cases that are not yet implemented.
--}
-
-inferTypeExp _ e = fail $ "Missing case in inferTypeExp encountered:\n" ++ printTree e
 
 inferTypeOverloadedExp :: Env -> Alternative Type -> Exp -> [Exp] -> Err Type
 inferTypeOverloadedExp env (Alternative ts) e es = do
