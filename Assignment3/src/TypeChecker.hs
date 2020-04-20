@@ -124,17 +124,15 @@ checkStm env (SInit ty' id e) ty = do
     return env'
 checkStm env (SIfElse e s1 s2) ty = do
     checkExp env e Type_bool
-    checkStm env s1 ty
-    checkStm env s2 ty
+    foldM(\e s -> checkStm e s ty) (newBlock env) [s1]
+    foldM(\e s -> checkStm e s ty) (newBlock env) [s2]
     return env
 checkStm env (SWhile e s) ty = do
     checkExp env e Type_bool
-    checkStm env s ty
+    foldM(\e s -> checkStm e s ty) (newBlock env) [s]
     return env
 checkStm env (SBlock stms) ty =
-    -- newBlock `env
-    -- return env
-    foldM (\e s -> checkStm env s ty) env stms
+    foldM (\e s -> checkStm e s ty) (newBlock env) stms
 {-
 Here need to go the missing cases. Once you have all cases you can delete the next line which is only needed to catch all cases that are not yet implemented.
 -}
