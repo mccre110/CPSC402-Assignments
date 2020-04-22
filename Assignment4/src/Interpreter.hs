@@ -235,9 +235,9 @@ evalExp (EDecr e@(EId i)) =
 evalExp (EDecr e) = 
 -}
 evalExp (ETimes e1 e2) = applyFun mulValue e1 e2
+evalExp (EPlus e1 e2) = applyFun addValue e1 e2
 {-
 evalExp (EDiv e1 e2)   = 
-evalExp (EPlus e1 e2)  = 
 evalExp (EMinus e1 e2) = 
 evalExp (ELt e1 e2)    = 
 evalExp (EGt e1 e2)    = 
