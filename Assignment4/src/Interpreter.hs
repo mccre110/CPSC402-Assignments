@@ -163,9 +163,10 @@ evalStm (SDecls _ ids) = do
     mapM (\i -> extendContext i VUndefined) ids
     return Nothing
 {-
-evalStm (SInit _ i e) = 
+evalStm (SInit _ i e) =
 evalStm SReturnVoid = 
 -}
+
 evalStm (SReturn e) = do
     v <- evalExp e
     return $ Just v
@@ -180,15 +181,15 @@ evalStm stm =
 
 evalExp :: Interpreter i => Exp -> i Value
 evalExp ETrue = return VTrue
-{-
-evalExp EFalse = 
--}
+
+evalExp EFalse = return VFalse
+
 evalExp (EInt i) = return $ VInt i
-{-
-evalExp (EDouble d) = 
-evalExp (EString _) = 
-evalExp (EId i) = 
--}
+
+evalExp (EDouble d) = return $ VDouble d
+{-evalExp (EString _) 
+evalExp (EId i) = -}
+
 evalExp (EApp i exps) = do
     vals <- mapM evalExp exps
     case (i, vals) of
@@ -235,13 +236,12 @@ evalExp (EDecr e@(EId i)) =
 evalExp (EDecr e) = 
 -}
 evalExp (ETimes e1 e2) = applyFun mulValue e1 e2
+evalExp (EDiv e1 e2)   = applyFun divValue e1 e2
 evalExp (EPlus e1 e2) = applyFun addValue e1 e2
-{-
-evalExp (EDiv e1 e2)   = 
-evalExp (EMinus e1 e2) = 
-evalExp (ELt e1 e2)    = 
-evalExp (EGt e1 e2)    = 
-evalExp (ELtEq e1 e2)  = 
+evalExp (EMinus e1 e2) = applyFun subValue e1 e2
+evalExp (ELt e1 e2)    = applyFun ltValue e1 e2
+evalExp (EGt e1 e2)    = applyFun gtValue e1 e2
+{-evalExp (ELtEq e1 e2)  = 
 evalExp (EGtEq e1 e2)  = 
 evalExp (EEq e1 e2)    =
 evalExp (ENEq e1 e2) =
@@ -249,8 +249,8 @@ evalExp (EAnd e1 e2) =
 evalExp (EOr e1 e2) = 
 evalExp (EAss (EId i) e) = 
 evalExp (EAss _ _) = 
-evalExp (ETyped e _) = 
--}
+evalExp (ETyped e _) = -}
+
 evalExp e = fail $ "Missing case in evalExp." ++ printTree e ++ "\n"
 
 
