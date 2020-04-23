@@ -270,14 +270,24 @@ evalExp (EPlus e1 e2)  = applyFun addValue e1 e2
 evalExp (EMinus e1 e2) = applyFun subValue e1 e2
 evalExp (ELt e1 e2)    = applyFun ltValue e1 e2
 evalExp (EGt e1 e2)    = applyFun gtValue e1 e2
--- evalExp (ELtEq e1 e2)  = do
---     val  <- applyFun ltValue e1 e2
---     -- val' <- evalExp e1 e2
---     if (val == VTrue || val' == VTrue) then 
---         return VTrue
---     else
---         return VFalse
--- evalExp (EGtEq e1 e2)  = 
+evalExp (ELtEq e1 e2)  = do
+    val <- applyFun ltValue e1 e2
+    if (val == VTrue) then
+        return VTrue
+    else do
+        if (e1 == e2) then
+            return VTrue
+        else
+            return VFalse
+evalExp (EGtEq e1 e2)  = do
+    val <- applyFun gtValue e1 e2
+    if (val == VTrue) then
+        return VTrue
+    else do
+        if (e1 == e2) then
+            return VTrue
+        else
+            return VFalse
 evalExp (EEq e1 e2) = do
     if (e1 == e2) then 
         return VTrue
@@ -303,10 +313,10 @@ evalExp (EOr e1 e2) = do
     else
         return VTrue
 {-gets hung on double_small_program.cc and large_program_fac.cc-}
-evalExp (EAss (EId i) e) = do
-    val <- evalExp e
-    updateContext i val
-    return val
+-- evalExp (EAss (EId i) e) = do
+--     val <- evalExp e
+--     updateContext i val
+--     return val
 -- evalExp (EAss _ _) = 
 -- evalExp (ETyped e _) = 
 
