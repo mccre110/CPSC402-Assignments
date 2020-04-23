@@ -14,6 +14,7 @@ import Control.Monad.State ( MonadState, StateT, get, put, modify, foldM, liftIO
 data Value = VInt Integer
            | VDouble Double
            | VVoid
+           -- | VString String
            | VUndefined deriving Eq
 
 
@@ -162,20 +163,31 @@ evalStm (SExp e) = do
 evalStm (SDecls _ ids) = do
     mapM (\i -> extendContext i VUndefined) ids
     return Nothing
-{-
-evalStm (SInit _ i e) =
-evalStm SReturnVoid = 
--}
+evalStm (SInit _ i e) = do
+    v <- evalExp e
+    extendContext i v
+    return Nothing
+{-I don't know what to do here-}
+-- evalStm SReturnVoid = return Nothing
 
 evalStm (SReturn e) = do
     v <- evalExp e
     return $ Just v
 
 evalStm (SBlock stms) = pushPop $ evalStms stms
-{-
-evalStm (SWhile e stm) = 
-evalStm (SIfElse e stm1 stm2) = 
--}
+
+evalStm (SWhile e stm) = do
+    v <- evalExp e
+    if (v == VTrue) then 
+        evalStm stm
+    else
+        return Nothing
+evalStm (SIfElse e stm1 stm2) = do
+    v <- evalExp e
+    if (v == VTrue) then
+        evalStm stm1
+    else
+        evalStm stm2
 evalStm stm = 
     fail $ "Missing case in evalStm " ++ printTree stm ++ "\n"
 
@@ -187,8 +199,12 @@ evalExp EFalse = return VFalse
 evalExp (EInt i) = return $ VInt i
 
 evalExp (EDouble d) = return $ VDouble d
-{-evalExp (EString _) 
-evalExp (EId i) = -}
+
+-- evalExp (EString s) = return $ VString s
+
+evalExp (EId i) = do
+    ty <- lookupContext i
+    return ty
 
 evalExp (EApp i exps) = do
     vals <- mapM evalExp exps
@@ -227,29 +243,72 @@ evalExp (EPIncr e@(EId i)) = do
     updateContext i val'
     return val
 evalExp (EPIncr e) = fail $ "Expected " ++ printTree e ++ " to be an id."
-{-
-evalExp (EPDecr e@(EId i)) = 
-evalExp (EPDecr e) = 
-evalExp (EIncr e@(EId i)) = 
-evalExp (EIncr e) = 
-evalExp (EDecr e@(EId i)) = 
-evalExp (EDecr e) = 
--}
+evalExp (EPDecr e@(EId i)) = do
+    val <- evalExp e
+    val' <- subValue val (VInt 1)
+    updateContext i val'
+    return val
+evalExp (EPDecr e) = fail $ "Expected " ++ printTree e ++ " to be an id."
+{-something needs to be changed about this--}
+evalExp (EIncr e@(EId i)) = do
+    val <- evalExp e
+    val' <- addValue val (VInt 1)
+    updateContext i val'
+    return val
+evalExp (EIncr e) = fail $ "Expected " ++ printTree e ++ " to be an id."
+{-something needs to be changed about this--}
+evalExp (EDecr e@(EId i)) = do
+    val <- evalExp e
+    val' <- subValue val (VInt 1)
+    updateContext i val'
+    return val
+evalExp (EDecr e) = fail $ "Expected " ++ printTree e ++ " to be an id."
+
 evalExp (ETimes e1 e2) = applyFun mulValue e1 e2
 evalExp (EDiv e1 e2)   = applyFun divValue e1 e2
-evalExp (EPlus e1 e2) = applyFun addValue e1 e2
+evalExp (EPlus e1 e2)  = applyFun addValue e1 e2
 evalExp (EMinus e1 e2) = applyFun subValue e1 e2
 evalExp (ELt e1 e2)    = applyFun ltValue e1 e2
 evalExp (EGt e1 e2)    = applyFun gtValue e1 e2
-{-evalExp (ELtEq e1 e2)  = 
-evalExp (EGtEq e1 e2)  = 
-evalExp (EEq e1 e2)    =
-evalExp (ENEq e1 e2) =
-evalExp (EAnd e1 e2) = 
-evalExp (EOr e1 e2) = 
-evalExp (EAss (EId i) e) = 
-evalExp (EAss _ _) = 
-evalExp (ETyped e _) = -}
+-- evalExp (ELtEq e1 e2)  = do
+--     val  <- applyFun ltValue e1 e2
+--     -- val' <- evalExp e1 e2
+--     if (val == VTrue || val' == VTrue) then 
+--         return VTrue
+--     else
+--         return VFalse
+-- evalExp (EGtEq e1 e2)  = 
+evalExp (EEq e1 e2) = do
+    if (e1 == e2) then 
+        return VTrue
+    else
+        return VFalse
+evalExp (ENEq e1 e2) = do
+    if (e1 == e2) then 
+        return VFalse
+    else
+        return VTrue
+evalExp (EAnd e1 e2) = do
+    val  <- evalExp e1
+    if (val == VTrue) then do
+        val' <- evalExp e2
+        return val'
+    else
+        return VFalse
+evalExp (EOr e1 e2) = do
+    val  <- evalExp e1
+    if (val == VFalse) then do
+        val' <- evalExp e2
+        return val'
+    else
+        return VTrue
+{-gets hung on double_small_program.cc and large_program_fac.cc-}
+evalExp (EAss (EId i) e) = do
+    val <- evalExp e
+    updateContext i val
+    return val
+-- evalExp (EAss _ _) = 
+-- evalExp (ETyped e _) = 
 
 evalExp e = fail $ "Missing case in evalExp." ++ printTree e ++ "\n"
 
