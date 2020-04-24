@@ -178,8 +178,9 @@ evalStm (SBlock stms) = pushPop $ evalStms stms
 
 evalStm (SWhile e stm) = do
     v <- evalExp e
-    if (v == VTrue) then 
-        evalStm stm
+    if (v == VTrue) then
+        pushPop $ evalStm stm
+        {-execute While statement again-}
     else
         return Nothing
 evalStm (SIfElse e stm1 stm2) = do
@@ -200,7 +201,7 @@ evalExp (EInt i) = return $ VInt i
 
 evalExp (EDouble d) = return $ VDouble d
 
--- evalExp (EString s) = return $ VString s
+-- evalExp (EString _) = return $ VString
 
 evalExp (EId i) = do
     ty <- lookupContext i
@@ -249,19 +250,17 @@ evalExp (EPDecr e@(EId i)) = do
     updateContext i val'
     return val
 evalExp (EPDecr e) = fail $ "Expected " ++ printTree e ++ " to be an id."
-{-something needs to be changed about this--}
 evalExp (EIncr e@(EId i)) = do
     val <- evalExp e
     val' <- addValue val (VInt 1)
     updateContext i val'
-    return val
+    return val'
 evalExp (EIncr e) = fail $ "Expected " ++ printTree e ++ " to be an id."
-{-something needs to be changed about this--}
 evalExp (EDecr e@(EId i)) = do
     val <- evalExp e
     val' <- subValue val (VInt 1)
     updateContext i val'
-    return val
+    return val'
 evalExp (EDecr e) = fail $ "Expected " ++ printTree e ++ " to be an id."
 
 evalExp (ETimes e1 e2) = applyFun mulValue e1 e2
@@ -289,12 +288,16 @@ evalExp (EGtEq e1 e2)  = do
         else
             return VFalse
 evalExp (EEq e1 e2) = do
-    if (e1 == e2) then 
+    val  <- evalExp e1
+    val' <- evalExp e2
+    if (val == val') then 
         return VTrue
     else
         return VFalse
 evalExp (ENEq e1 e2) = do
-    if (e1 == e2) then 
+    val  <- evalExp e1
+    val' <- evalExp e2
+    if (val == val') then 
         return VFalse
     else
         return VTrue
