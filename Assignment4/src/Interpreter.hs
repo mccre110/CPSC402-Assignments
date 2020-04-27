@@ -167,8 +167,8 @@ evalStm (SInit _ i e) = do
     v <- evalExp e
     extendContext i v
     return Nothing
-{-I don't know what to do here-}
--- evalStm SReturnVoid = return Nothing
+
+evalStm SReturnVoid = return Nothing
 
 evalStm (SReturn e) = do
     v <- evalExp e
@@ -178,17 +178,17 @@ evalStm (SBlock stms) = pushPop $ evalStms stms
 
 evalStm (SWhile e stm) = do
     v <- evalExp e
-    if (v == VTrue) then
+    if (v == VTrue) then do
         pushPop $ evalStm stm
-        {-execute While statement again-}
+        evalStm (SWhile e stm)
     else
         return Nothing
 evalStm (SIfElse e stm1 stm2) = do
     v <- evalExp e
     if (v == VTrue) then
-        evalStm stm1
+        pushPop $ evalStm stm1
     else
-        evalStm stm2
+        pushPop $ evalStm stm2
 evalStm stm = 
     fail $ "Missing case in evalStm " ++ printTree stm ++ "\n"
 
@@ -315,12 +315,11 @@ evalExp (EOr e1 e2) = do
         return val'
     else
         return VTrue
-{-gets hung on double_small_program.cc and large_program_fac.cc-}
--- evalExp (EAss (EId i) e) = do
---     val <- evalExp e
---     updateContext i val
---     return val
--- evalExp (EAss _ _) = 
+evalExp (EAss (EId i) e) = do
+    val <- evalExp e
+    updateContext i val
+    return val
+evalExp (EAss _ _) = fail $ "Missing id or expression.\n"
 -- evalExp (ETyped e _) = 
 
 evalExp e = fail $ "Missing case in evalExp." ++ printTree e ++ "\n"
