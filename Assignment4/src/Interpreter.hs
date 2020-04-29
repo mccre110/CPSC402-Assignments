@@ -14,7 +14,6 @@ import Control.Monad.State ( MonadState, StateT, get, put, modify, foldM, liftIO
 data Value = VInt Integer
            | VDouble Double
            | VVoid
-           -- | VString String
            | VUndefined deriving Eq
 
 
@@ -168,7 +167,7 @@ evalStm (SInit _ i e) = do
     extendContext i v
     return Nothing
 
-evalStm SReturnVoid = return Nothing
+evalStm SReturnVoid  = return Nothing
 
 evalStm (SReturn e) = do
     v <- evalExp e
@@ -180,6 +179,7 @@ evalStm (SWhile e stm) = do
     v <- evalExp e
     if (v == VTrue) then do
         pushPop $ evalStm stm
+        -- something is messed up
         evalStm (SWhile e stm)
     else
         return Nothing
@@ -189,8 +189,6 @@ evalStm (SIfElse e stm1 stm2) = do
         pushPop $ evalStm stm1
     else
         pushPop $ evalStm stm2
-evalStm stm = 
-    fail $ "Missing case in evalStm " ++ printTree stm ++ "\n"
 
 evalExp :: Interpreter i => Exp -> i Value
 evalExp ETrue = return VTrue
@@ -201,7 +199,7 @@ evalExp (EInt i) = return $ VInt i
 
 evalExp (EDouble d) = return $ VDouble d
 
--- evalExp (EString _) = return $ VString
+evalExp (EString _) = return $ VUndefined
 
 evalExp (EId i) = do
     ty <- lookupContext i
@@ -320,10 +318,9 @@ evalExp (EAss (EId i) e) = do
     updateContext i val
     return val
 evalExp (EAss _ _) = fail $ "Missing id or expression.\n"
--- evalExp (ETyped e _) = 
-
-evalExp e = fail $ "Missing case in evalExp." ++ printTree e ++ "\n"
-
+evalExp (ETyped e _) = do
+    val <- evalExp e
+    return val 
 
 applyFun :: Interpreter i => (Value -> Value -> i Value) -> Exp -> Exp -> i Value
 applyFun f e1 e2 = do
