@@ -162,33 +162,51 @@ evalStm (SExp e) = do
 evalStm (SDecls _ ids) = do
     mapM (\i -> extendContext i VUndefined) ids
     return Nothing
-{-
-evalStm (SInit _ i e) = 
-evalStm SReturnVoid = 
--}
+evalStm (SInit _ i e) = do
+    v <- evalExp e
+    extendContext i v
+    return Nothing
+
+evalStm SReturnVoid  = return Nothing
+
 evalStm (SReturn e) = do
     v <- evalExp e
     return $ Just v
 
 evalStm (SBlock stms) = pushPop $ evalStms stms
-{-
-evalStm (SWhile e stm) = 
-evalStm (SIfElse e stm1 stm2) = 
--}
-evalStm stm = 
-    fail $ "Missing case in evalStm " ++ printTree stm ++ "\n"
+
+evalStm (SWhile e stm) = do
+    v <- evalExp e
+    if (v == VTrue) then do
+        val <- pushPop $ evalStm stm
+        if (val == Nothing) then do
+            evalStm (SWhile e stm)
+        else
+            return val
+    else
+        return Nothing
+evalStm (SIfElse e stm1 stm2) = do
+    v <- pushPop $ evalExp e
+    if (v == VTrue) then
+        pushPop $ evalStm stm1
+    else
+        pushPop $ evalStm stm2
 
 evalExp :: Interpreter i => Exp -> i Value
 evalExp ETrue = return VTrue
-{-
-evalExp EFalse = 
--}
+
+evalExp EFalse = return VFalse
+
 evalExp (EInt i) = return $ VInt i
-{-
-evalExp (EDouble d) = 
-evalExp (EString _) = 
-evalExp (EId i) = 
--}
+
+evalExp (EDouble d) = return $ VDouble d
+
+evalExp (EString _) = return $ VUndefined
+
+evalExp (EId i) = do
+    ty <- lookupContext i
+    return ty
+
 evalExp (EApp i exps) = do
     vals <- mapM evalExp exps
     case (i, vals) of
@@ -226,33 +244,92 @@ evalExp (EPIncr e@(EId i)) = do
     updateContext i val'
     return val
 evalExp (EPIncr e) = fail $ "Expected " ++ printTree e ++ " to be an id."
-{-
-evalExp (EPDecr e@(EId i)) = 
-evalExp (EPDecr e) = 
-evalExp (EIncr e@(EId i)) = 
-evalExp (EIncr e) = 
-evalExp (EDecr e@(EId i)) = 
-evalExp (EDecr e) = 
--}
-evalExp (ETimes e1 e2) = applyFun mulValue e1 e2
-evalExp (EPlus e1 e2) = applyFun addValue e1 e2
-{-
-evalExp (EDiv e1 e2)   = 
-evalExp (EMinus e1 e2) = 
-evalExp (ELt e1 e2)    = 
-evalExp (EGt e1 e2)    = 
-evalExp (ELtEq e1 e2)  = 
-evalExp (EGtEq e1 e2)  = 
-evalExp (EEq e1 e2)    =
-evalExp (ENEq e1 e2) =
-evalExp (EAnd e1 e2) = 
-evalExp (EOr e1 e2) = 
-evalExp (EAss (EId i) e) = 
-evalExp (EAss _ _) = 
-evalExp (ETyped e _) = 
--}
-evalExp e = fail $ "Missing case in evalExp." ++ printTree e ++ "\n"
+evalExp (EPDecr e@(EId i)) = do
+    val <- evalExp e
+    val' <- subValue val (VInt 1)
+    updateContext i val'
+    return val
+evalExp (EPDecr e) = fail $ "Expected " ++ printTree e ++ " to be an id."
+evalExp (EIncr e@(EId i)) = do
+    val <- evalExp e
+    val' <- addValue val (VInt 1)
+    updateContext i val'
+    return val'
+evalExp (EIncr e) = fail $ "Expected " ++ printTree e ++ " to be an id."
+evalExp (EDecr e@(EId i)) = do
+    val <- evalExp e
+    val' <- subValue val (VInt 1)
+    updateContext i val'
+    return val'
+evalExp (EDecr e) = fail $ "Expected " ++ printTree e ++ " to be an id."
 
+evalExp (ETimes e1 e2) = applyFun mulValue e1 e2
+evalExp (EDiv e1 e2)   = applyFun divValue e1 e2
+evalExp (EPlus e1 e2)  = applyFun addValue e1 e2
+evalExp (EMinus e1 e2) = applyFun subValue e1 e2
+evalExp (ELt e1 e2)    = applyFun ltValue e1 e2
+evalExp (EGt e1 e2)    = applyFun gtValue e1 e2
+evalExp (ELtEq e1 e2) = do
+   val1 <- evalExp e1
+   val2 <- evalExp e2
+   res  <- ltValue val1 val2
+   if (res == VTrue) then
+       return VTrue
+   else do
+       if (val1 == val2) then
+           return VTrue
+       else
+           return VFalse
+evalExp (EGtEq e1 e2) = do
+    {-first getting the values of each expression to use
+    in evaluating > and ==, rather than evaluating
+    the expression twice-}
+    val1 <- evalExp e1
+    val2 <- evalExp e2
+    res  <- gtValue val1 val2
+    if (res == VTrue) then
+        return VTrue
+    else do
+        if (val1 == val2) then
+            return VTrue
+        else
+            return VFalse
+evalExp (EEq e1 e2) = do
+    val  <- evalExp e1
+    val' <- evalExp e2
+    if (val == val') then 
+        return VTrue
+    else
+        return VFalse
+evalExp (ENEq e1 e2) = do
+    val  <- evalExp e1
+    val' <- evalExp e2
+    if (val == val') then 
+        return VFalse
+    else
+        return VTrue
+evalExp (EAnd e1 e2) = do
+    val  <- evalExp e1
+    if (val == VTrue) then do
+        val' <- evalExp e2
+        return val'
+    else
+        return VFalse
+evalExp (EOr e1 e2) = do
+    val  <- evalExp e1
+    if (val == VFalse) then do
+        val' <- evalExp e2
+        return val'
+    else
+        return VTrue
+evalExp (EAss (EId i) e) = do
+    val <- evalExp e
+    updateContext i val
+    return val
+evalExp (EAss _ _) = fail $ "Missing id or expression.\n"
+evalExp (ETyped e _) = do
+    val <- evalExp e
+    return val 
 
 applyFun :: Interpreter i => (Value -> Value -> i Value) -> Exp -> Exp -> i Value
 applyFun f e1 e2 = do
