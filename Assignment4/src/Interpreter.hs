@@ -178,9 +178,11 @@ evalStm (SBlock stms) = pushPop $ evalStms stms
 evalStm (SWhile e stm) = do
     v <- evalExp e
     if (v == VTrue) then do
-        pushPop $ evalStm stm
-        -- something is messed up
-        evalStm (SWhile e stm)
+        val <- pushPop $ evalStm stm
+        if (val == Nothing) then do
+            evalStm (SWhile e stm)
+        else
+            return val
     else
         return Nothing
 evalStm (SIfElse e stm1 stm2) = do
@@ -267,7 +269,7 @@ evalExp (EPlus e1 e2)  = applyFun addValue e1 e2
 evalExp (EMinus e1 e2) = applyFun subValue e1 e2
 evalExp (ELt e1 e2)    = applyFun ltValue e1 e2
 evalExp (EGt e1 e2)    = applyFun gtValue e1 e2
-evalExp (ELtEq e1 e2)  = do
+evalExp (ELtEq e1 e2) = do
     val <- applyFun ltValue e1 e2
     if (val == VTrue) then
         return VTrue
@@ -276,7 +278,12 @@ evalExp (ELtEq e1 e2)  = do
             return VTrue
         else
             return VFalse
-evalExp (EGtEq e1 e2)  = do
+        -- val' <- pushPop $ evalExp (EEq e1 e2)
+        -- if (val' == VTrue) then
+        --     return VTrue
+        -- else
+        --     return VFalse
+evalExp (EGtEq e1 e2) = do
     val <- applyFun gtValue e1 e2
     if (val == VTrue) then
         return VTrue
@@ -285,6 +292,11 @@ evalExp (EGtEq e1 e2)  = do
             return VTrue
         else
             return VFalse
+        -- val <- evalExp(EEq e1 e2)
+        -- if (val == VTrue) then
+        --     return VTrue
+        -- else
+        --     return VFalse
 evalExp (EEq e1 e2) = do
     val  <- evalExp e1
     val' <- evalExp e2
@@ -387,3 +399,4 @@ negValue :: Interpreter i => Value -> i Value
 negValue VFalse = return $ VTrue
 negValue VTrue  = return $ VFalse
 negValue _ = fail $ "Internal error, trying to apply negValue to incompatible types."
+
