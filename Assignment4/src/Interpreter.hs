@@ -186,7 +186,7 @@ evalStm (SWhile e stm) = do
     else
         return Nothing
 evalStm (SIfElse e stm1 stm2) = do
-    v <- evalExp e
+    v <- pushPop $ evalExp e
     if (v == VTrue) then
         pushPop $ evalStm stm1
     else
@@ -270,33 +270,30 @@ evalExp (EMinus e1 e2) = applyFun subValue e1 e2
 evalExp (ELt e1 e2)    = applyFun ltValue e1 e2
 evalExp (EGt e1 e2)    = applyFun gtValue e1 e2
 evalExp (ELtEq e1 e2) = do
-    val <- applyFun ltValue e1 e2
-    if (val == VTrue) then
-        return VTrue
-    else do
-        if (e1 == e2) then
-            return VTrue
-        else
-            return VFalse
-        -- val' <- pushPop $ evalExp (EEq e1 e2)
-        -- if (val' == VTrue) then
-        --     return VTrue
-        -- else
-        --     return VFalse
+   val1 <- evalExp e1
+   val2 <- evalExp e2
+   res  <- ltValue val1 val2
+   if (res == VTrue) then
+       return VTrue
+   else do
+       if (val1 == val2) then
+           return VTrue
+       else
+           return VFalse
 evalExp (EGtEq e1 e2) = do
-    val <- applyFun gtValue e1 e2
-    if (val == VTrue) then
+    {-first getting the values of each expression to use
+    in evaluating > and ==, rather than evaluating
+    the expression twice-}
+    val1 <- evalExp e1
+    val2 <- evalExp e2
+    res  <- gtValue val1 val2
+    if (res == VTrue) then
         return VTrue
     else do
-        if (e1 == e2) then
+        if (val1 == val2) then
             return VTrue
         else
             return VFalse
-        -- val <- evalExp(EEq e1 e2)
-        -- if (val == VTrue) then
-        --     return VTrue
-        -- else
-        --     return VFalse
 evalExp (EEq e1 e2) = do
     val  <- evalExp e1
     val' <- evalExp e2
@@ -399,4 +396,3 @@ negValue :: Interpreter i => Value -> i Value
 negValue VFalse = return $ VTrue
 negValue VTrue  = return $ VFalse
 negValue _ = fail $ "Internal error, trying to apply negValue to incompatible types."
-
