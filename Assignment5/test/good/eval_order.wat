@@ -1,0 +1,11 @@
+(module
+ (import "env" "readInt" (func $readInt (result i32)))
+ (import "env" "readDouble" (func $readDouble (result f64)))
+ (import "env" "printInt" (func $printInt (param i32)))
+ (import "env" "printDouble" (func $printDouble (param f64)))
+ (func $order (param $ia$0 i32) (param $ib$0 i32) (result i32))
+ (func $printIntInt (param $ii$0 i32) (result i32))
+ (func $printIntBool (param $ii$0 i32) (result i32))
+ (func $main (result i32))
+ (export "main" (func $main))
+)

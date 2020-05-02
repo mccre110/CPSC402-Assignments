@@ -3,9 +3,6 @@
 ## About
 A compiler for a fragment of the the C++ programming language.
 
-### May 1st Submission
-- ass_in_arith-short.wat
-
 ### Instructions
-- node wat2wasm.js <.wat file>
-- node run.js <.wasm file>
+- To compile run `stack build` and to test `stack test`.
+- To filter tests that fail do `stack test | grep Error` and to filter tests that pass do `stack test | grep Success`.
