@@ -248,11 +248,14 @@ compileStm (SDecls ty ids) = do
     -- we have already declared all variables via collectDecls
     modify (\(m, c) -> (foldl (\m' i -> M.insert i (ty,c) m') m ids, c))
     return []
-{- 
-compileStm (SInit ty i e) = 
-compileStm (SReturn e) = 
-    -- use `compileExp Nested e`
--}
+ 
+-- compileStm (SInit ty i e) = 
+compileStm (SReturn e) = do
+    s_e <- compileExp Nested e
+    return $
+      s_e++
+      [s_return]
+
 compileStm SReturnVoid = return []
 -- compileStm (SWhile cond s) = do
     -- use `pushPop $ compileStm s`
@@ -325,7 +328,7 @@ compileExp n ETrue = return $ if n == Nested then [s_i32_const 1] else []
 
 -- compileExp n EFalse = 
 
--- compileExp n (EInt i) = 
+compileExp n (EInt i) = return $ if n == Nested then [s_i32_const i] else []
 
 -- compileExp n (EDouble i) = 
 
