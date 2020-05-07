@@ -335,12 +335,13 @@ compileExp n (EInt i) = return $ if n == Nested then [s_i32_const i] else []
 -- compileExp n (EId i) = do
     -- use `getVarName`
 
--- compileExp n x@(EApp (Id i) args) = do 
-    -- use `mapM` to iterate `compileExp Nested` over `args`
-    -- get the type of `EApp (Id i) args` 
-    -- use `s_call`
-    -- if n==TopLevel and the type is not void use `s_drop`
-
+compileExp n x@(EApp (Id i) args) = do
+    s_args <- mapM (compileExp Nested) args
+    ty <- getType x
+    return $
+        concat s_args ++
+        [s_call i] ++
+        if n == TopLevel && ty /= Type_void then [s_drop] else []
 -- compileExp n (EIncr id@(EId i)) = do
     -- make a case distinction on whether the type of `EId i` is `Type_int` or `Type_double`
 -- compileExp n (EPIncr id@(EId i)) = do
@@ -360,6 +361,7 @@ compileExp _ (EGtEq e1 e2)  =
 compileExp _ (EEq e1 e2)    =  
 compileExp _ (ENEq e1 e2)   =  
 -}
+compileExp n (ETimes e1 e2) = compileArith e1 e2 s_i32_mul s_f64_mul
 
 -- for And and Or use if/then/else
 -- compileExp _ (EAnd e1 e2) = do
@@ -369,7 +371,6 @@ compileExp _ (ENEq e1 e2)   =
     -- use s_local_tee and s_local_set
         
 compileExp n (ETyped e _) = compileExp n e
-
 -- delete after implementing the above
 compileExp _ _ = return []
 
