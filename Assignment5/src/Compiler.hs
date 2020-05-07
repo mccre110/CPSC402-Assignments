@@ -362,6 +362,15 @@ compileExp _ (EEq e1 e2)    =
 compileExp _ (ENEq e1 e2)   =  
 -}
 compileExp n (ETimes e1 e2) = compileArith e1 e2 s_i32_mul s_f64_mul
+compileExp n (EDiv e1 e2)   = compileArith e1 e2 s_i32_div_s s_f64_div
+compileExp n (EPlus e1 e2)  = compileArith e1 e2 s_i32_add s_f64_add
+compileExp n (EMinus e1 e2) = compileArith e1 e2 s_i32_sub s_f64_sub
+compileExp n (ELt e1 e2)    = compileArith e1 e2 s_i32_lt_s s_f64_lt
+compileExp n (EGt e1 e2)    = compileArith e1 e2 s_i32_gt_s s_f64_gt
+compileExp n (ELtEq e1 e2)  = compileArith e1 e2 s_i32_le_s s_f64_le
+compileExp n (EGtEq e1 e2)  = compileArith e1 e2 s_i32_ge_s s_f64_ge
+compileExp n (EEq e1 e2)    = compileArith e1 e2 s_i32_eq s_f64_eq
+compileExp n (ENEq e1 e2)   = compileArith e1 e2 s_i32_ne s_f64_ne
 
 -- for And and Or use if/then/else
 -- compileExp _ (EAnd e1 e2) = do
