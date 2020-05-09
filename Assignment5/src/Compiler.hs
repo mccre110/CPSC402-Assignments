@@ -353,7 +353,7 @@ compileExp n x@(EApp (Id i) args) = do
 compileExp n (EIncr id@(EId i)) = do
     t <- getType id
     v <- getVarName i
-    if t == Type_double then return $
+    if t == Type_double then return
             [s_local_get v, s_f64_const 1, s_f64_add, s_local_tee v]
         else return $
             [s_local_get v, s_i32_const 1, s_i32_add, s_local_tee v]
@@ -367,9 +367,9 @@ compileExp n (EPIncr id@(EId i)) = do
 compileExp n (EDecr id@(EId i)) = do
     t <- getType id
     v <- getVarName i
-    if t == Type_double then return $
+    if t == Type_double then return
         [s_local_get v, s_f64_const 1, s_f64_sub, s_local_tee v] 
-    else return $
+    else return
         [s_local_get v, s_i32_const 1, s_i32_sub, s_local_tee v]
 compileExp n (EPDecr id@(EId i)) = do
     t <- getType id
@@ -390,10 +390,20 @@ compileExp n (EGtEq e1 e2)  = compileArith e1 e2 s_i32_ge_s s_f64_ge
 compileExp n (EEq e1 e2)    = compileArith e1 e2 s_i32_eq s_f64_eq
 compileExp n (ENEq e1 e2)   = compileArith e1 e2 s_i32_ne s_f64_ne
 
--- for And and Or use if/then/else
--- compileExp _ (EAnd e1 e2) = do
--- 	if (compileExp TopLevel e1 == compileExp TopLevel e2)
--- compileExp _ (EOr e1 e2) = do
+compileExp _ (EAnd e1 e2) = do
+    s_e1 <- compileExp Nested e1
+    s_e2 <- compileExp Nested e2
+    if s_e1 == [s_i32_const 1] && s_e2 == [s_i32_const 1] then return $
+        [s_i32_const 1] 
+    else return $
+        [s_i32_const 0]
+compileExp _ (EOr e1 e2) = do
+    s_e1 <- compileExp Nested e1
+    s_e2 <- compileExp Nested e2
+    if s_e1 == [s_i32_const 1] || s_e2 == [s_i32_const 1] then return $
+        [s_i32_const 1] 
+    else return $
+        [s_i32_const 0]
 
 -- compileExp n (EAss (EId i) e) = do
 --     s_e <- compileExp Nested e
