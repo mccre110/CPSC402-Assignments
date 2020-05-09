@@ -250,12 +250,13 @@ compileStm (SDecls ty ids) = do
     return []
  
 -- compileStm (SInit ty i e) = do
---     modify (\(m, c) -> (M.insert i ty))
---     compileExp TopLevel e
+--     (m,c) <- get
+--     modify (\(m, c) ->  M.insert i (ty,c))
+--     return []
+    -- compileExp TopLevel e
     -- v <- getVarName i
     -- return [s_local_set v]
-    -- v <- getVarName i
-    -- return $ [s_local_set v]
+
 compileStm (SReturn e) = do
     s_e <- compileExp Nested e
     return $
@@ -375,9 +376,9 @@ compileExp n (EPDecr id@(EId i)) = do
     t <- getType id
     v <- getVarName i
     if t == Type_double then return
-            [s_local_get v, s_local_get v, s_f64_const 1,  s_f64_add, s_local_set v]
+            [s_local_get v, s_local_get v, s_f64_const 1,  s_f64_sub, s_local_set v]
         else return
-            [s_local_get v, s_local_get v, s_i32_const 1, s_i32_add, s_local_set v]
+            [s_local_get v, s_local_get v, s_i32_const 1, s_i32_sub, s_local_set v]
 
 compileExp n (ETimes e1 e2) = compileArith e1 e2 s_i32_mul s_f64_mul
 compileExp n (EDiv e1 e2)   = compileArith e1 e2 s_i32_div_s s_f64_div
@@ -405,12 +406,10 @@ compileExp _ (EOr e1 e2) = do
     else return $
         [s_i32_const 0]
 
--- compileExp n (EAss (EId i) e) = do
---     s_e <- compileExp Nested e
---     v <- getVarName i
---     -- x <- [s_local_set v]
---     return [s_local_set v]
---     -- use s_local_tee and s_local_set
+compileExp n (EAss (EId i) e) = do
+    s_e <- compileExp Nested e
+    v <- getVarName i
+    return $ if n == Nested then s_e ++ [s_local_tee v] else s_e ++ [s_local_set v]
         
 compileExp n (ETyped e _) = compileExp n e
 -- delete after implementing the above
