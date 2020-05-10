@@ -254,7 +254,7 @@ compileStm (SInit ty i e) = do
     s_e <- compileExp Nested e
     v <- getVarName i
     return $
-        s_e ++
+        s_e++
         [s_local_set v]
 
 compileStm (SReturn e) = do
@@ -264,11 +264,18 @@ compileStm (SReturn e) = do
       [s_return]
 
 compileStm SReturnVoid = return []
--- compileStm (SWhile cond s) = do
-    -- use `pushPop $ compileStm s`
-    -- use `[ s_block ... ]` and `[ s_loop ]`
-    -- proceed as in fibonacci.wat
--- compileStm (SBlock stms) = do
+
+compileStm (SWhile cond s) = do
+    s' <- pushPop $ compileStm s
+    s_cond <- compileExp Nested cond
+    return $ 
+        [s_block $
+        [s_loop $ 
+        s_cond ++ [s_i32_eqz] ++ [s_br_if 1] ++ s' ++ [s_br 0]]]
+
+compileStm (SBlock stms) = do
+    s_stms <- pushPop $ mapM compileStm stms
+    return $ concat s_stms
     -- use `mapM` to interate `compileStm` over the list `stms`
     -- you may want to use `concat :: [[a]] -> [a]` (hoogle it)
 -- compileStm s@(SIfElse cond s1 s2) = do
