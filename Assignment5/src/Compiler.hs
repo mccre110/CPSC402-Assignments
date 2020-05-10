@@ -249,13 +249,13 @@ compileStm (SDecls ty ids) = do
     modify (\(m, c) -> (foldl (\m' i -> M.insert i (ty,c) m') m ids, c))
     return []
  
--- compileStm (SInit ty i e) = do
---     (m,c) <- get
---     modify (\(m, c) ->  M.insert i (ty,c))
---     return []
-    -- compileExp TopLevel e
-    -- v <- getVarName i
-    -- return [s_local_set v]
+compileStm (SInit ty i e) = do
+    modify (\(m, c) ->  (M.insert i (ty,c) m, c))
+    s_e <- compileExp Nested e
+    v <- getVarName i
+    return $
+        s_e ++
+        [s_local_set v]
 
 compileStm (SReturn e) = do
     s_e <- compileExp Nested e
