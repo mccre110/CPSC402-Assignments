@@ -278,10 +278,15 @@ compileStm (SBlock stms) = do
     return $ concat s_stms
     -- use `mapM` to interate `compileStm` over the list `stms`
     -- you may want to use `concat :: [[a]] -> [a]` (hoogle it)
--- compileStm s@(SIfElse cond s1 s2) = do
+compileStm s@(SIfElse cond s1 s2) = do
+    s_if <- pushPop $ compileStm s1
+    s_else <- pushPop $ compileStm s2
+    s_cond <- pushPop $ compileExp Nested cond
+    t <- getReturn (s)
+    return $ s_cond ++ [s_if_then_else (compileType t) s_if s_else]
     -- we have to specify the return type of the if/then/else block
 -- delete the line below after implementing the above
-compileStm _ = return []
+-- compileStm _ = return []
 
 -- computes the return type of the given statement.
 -- if a return x statement occurs, getReturn returns the type of x
@@ -368,10 +373,24 @@ compileExp n (EIncr id@(EId i)) = do
 compileExp n (EPIncr id@(EId i)) = do
     t <- getType id
     v <- getVarName i
-    if t == Type_double then return
-            [s_local_get v, s_local_get v, s_f64_const 1,  s_f64_add, s_local_set v]
-        else return
-            [s_local_get v, s_local_get v, s_i32_const 1, s_i32_add, s_local_set v]
+    if t == Type_double then return $
+        [s_local_get v] ++
+        [s_local_get v] ++
+        [s_f64_const 1] ++
+        [s_f64_add] ++
+        [s_local_set v] ++
+        if n == Nested then [] else [s_drop]
+    else return $
+        [s_local_get v] ++
+        [s_local_get v] ++
+        [s_i32_const 1] ++
+        [s_i32_add] ++
+        [s_local_set v] ++ 
+        if n == Nested then [] else [s_drop]
+        -- [s_local_set v]
+            -- [s_local_get v, s_local_get v, s_i32_const 1, s_i32_add,
+            -- if n == Nested then s_local_set v else s_local_set v, s_drop]
+
 compileExp n (EDecr id@(EId i)) = do
     t <- getType id
     v <- getVarName i
@@ -385,7 +404,8 @@ compileExp n (EPDecr id@(EId i)) = do
     if t == Type_double then return
             [s_local_get v, s_local_get v, s_f64_const 1,  s_f64_sub, s_local_set v]
         else return
-            [s_local_get v, s_local_get v, s_i32_const 1, s_i32_sub, s_local_set v]
+            [s_local_get v, s_local_get v, s_i32_const 1, s_i32_sub,
+            if n == Nested then s_local_set v else s_local_set v, s_drop]
 
 compileExp n (ETimes e1 e2) = compileArith e1 e2 s_i32_mul s_f64_mul
 compileExp n (EDiv e1 e2)   = compileArith e1 e2 s_i32_div_s s_f64_div
@@ -401,17 +421,16 @@ compileExp n (ENEq e1 e2)   = compileArith e1 e2 s_i32_ne s_f64_ne
 compileExp _ (EAnd e1 e2) = do
     s_e1 <- compileExp Nested e1
     s_e2 <- compileExp Nested e2
-    if s_e1 == [s_i32_const 1] && s_e2 == [s_i32_const 1] then return $
-        [s_i32_const 1] 
-    else return $
-        [s_i32_const 0]
+    let inner = s_e2 ++ [s_if_then_else (compileType Type_int) [s_i32_const 1] [s_i32_const 0]]
+    let outer = s_e1 ++ [s_if_then_else (compileType Type_int) inner [s_i32_const 0]]
+    return $ outer
+
 compileExp _ (EOr e1 e2) = do
-    s_e1 <- compileExp Nested e1
-    s_e2 <- compileExp Nested e2
-    if s_e1 == [s_i32_const 1] || s_e2 == [s_i32_const 1] then return $
-        [s_i32_const 1] 
-    else return $
-        [s_i32_const 0]
+  s_e1 <- compileExp Nested e1
+  s_e2 <- compileExp Nested e2
+  let inner = s_e2 ++ [s_if_then_else (compileType Type_int) [s_i32_const 1] [s_i32_const 0]]
+  let outer = s_e1 ++ [s_if_then_else (compileType Type_int) [s_i32_const 1] inner]
+  return $ outer
 
 compileExp n (EAss (EId i) e) = do
     s_e <- compileExp Nested e
@@ -420,7 +439,7 @@ compileExp n (EAss (EId i) e) = do
         
 compileExp n (ETyped e _) = compileExp n e
 -- delete after implementing the above
-compileExp _ _ = return []
+-- compileExp _ _ = return []
 
 compileArith e1 e2 intOp doubleOp = do
     s_e1 <- compileExp Nested e1
