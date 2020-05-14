@@ -385,7 +385,7 @@ compileExp n (EPIncr id@(EId i)) = do
         [s_local_get v] ++
         [s_i32_const 1] ++
         [s_i32_add] ++
-        [s_local_set v] ++ 
+        [s_local_set v] ++
         if n == Nested then [] else [s_drop]
         -- [s_local_set v]
             -- [s_local_get v, s_local_get v, s_i32_const 1, s_i32_add,
@@ -401,11 +401,20 @@ compileExp n (EDecr id@(EId i)) = do
 compileExp n (EPDecr id@(EId i)) = do
     t <- getType id
     v <- getVarName i
-    if t == Type_double then return
-            [s_local_get v, s_local_get v, s_f64_const 1,  s_f64_sub, s_local_set v]
-        else return
-            [s_local_get v, s_local_get v, s_i32_const 1, s_i32_sub,
-            if n == Nested then s_local_set v else s_local_set v, s_drop]
+    if t == Type_double then return $
+        [s_local_get v] ++
+        [s_local_get v] ++
+        [s_f64_const 1] ++
+        [s_f64_sub] ++
+        [s_local_set v] ++
+        if n == Nested then [] else [s_drop]
+    else return $
+        [s_local_get v] ++
+        [s_local_get v] ++
+        [s_i32_const 1] ++
+        [s_i32_sub] ++
+        [s_local_set v] ++
+        if n == Nested then [] else [s_drop]
 
 compileExp n (ETimes e1 e2) = compileArith e1 e2 s_i32_mul s_f64_mul
 compileExp n (EDiv e1 e2)   = compileArith e1 e2 s_i32_div_s s_f64_div
